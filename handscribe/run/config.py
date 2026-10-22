@@ -50,7 +50,13 @@ def load_config():
     
     if p.config is not None:
         for config_name, config_value in nested_configs.items():
-            setattr(args, config_name, config_value)
+            cli_value = getattr(args, config_name, None)
+            if isinstance(cli_value, dict) and cli_value:
+                merged = dict(config_value)
+                merged.update(cli_value)
+                setattr(args, config_name, merged)
+            else:
+                setattr(args, config_name, config_value)
 
     if hasattr(args, 'dataset'):
         config_path = f"handscribe/configs/{args.dataset}.yaml"

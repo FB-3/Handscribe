@@ -1,18 +1,18 @@
-import os
-import shutil
-import torch
-import torch.nn as nn
-import numpy as np
-import wandb
 import importlib
 import inspect
+import os
+import shutil
 from collections import OrderedDict
 from shutil import copytree
 
-from handscribe.modules.sync_batchnorm.batchnorm import convert_model
+import numpy as np
+import torch
+import wandb
+
 import handscribe.utils as utils
 from handscribe.utils.helper import CheckpointManager, MetricMode
 from seq_scripts import seq_train, seq_eval, seq_feature_generation
+
 
 class ExperimentProcessor:
     def __init__(self, args):
@@ -70,16 +70,24 @@ class ExperimentProcessor:
         if hasattr(self.args, 'wandb') and isinstance(self.args.wandb, dict):
             w_proj = self.args.wandb.get('wandb_project', 'handscribe')
             w_entity = self.args.wandb.get('wandb_entity', None)
-            w_off = self.args.wandb.get('wandb_offline', False)
+            w_mode = self.args.wandb.get(
+                'wandb_mode',
+                'offline' if self.args.wandb.get('wandb_offline', False) else 'online'
+            )
         else:
             w_proj = getattr(self.args, 'wandb_project', 'handscribe')
             w_entity = getattr(self.args, 'wandb_entity', None)
-            w_off = getattr(self.args, 'wandb_offline', False)
+            w_mode = getattr(
+                self.args, 'wandb_mode',
+                'offline' if getattr(self.args, 'wandb_offline', False) else 'online'
+            )
 
+        if w_mode not in ('online', 'offline', 'disabled'):
+            w_mode = 'online'
         wandb.init(
             project=w_proj,
             entity=w_entity,
-            mode='offline' if w_off else 'online',
+            mode=w_mode,
             config=vars(self.args),
             name=os.path.basename(self.args.work_dir.rstrip('/'))
         )

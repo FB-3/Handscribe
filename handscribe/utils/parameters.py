@@ -34,6 +34,14 @@ def get_parser():
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # processor
     parser.add_argument('--phase', default='train', help='can be train, test and features')
+    parser.add_argument(
+        '--wandb',
+        nargs='*',
+        action=ParseKwargs,
+        default=dict(),
+        help="W&B settings, e.g. --wandb wandb_mode=disabled wandb_project=handscribe. "
+             "wandb_mode accepts 'online' | 'offline' | 'disabled'."
+    )
     
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # debug
